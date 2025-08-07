@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robotics Timeline | Timeline Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        /* Light mode default */
+        body {
+            background-color: #f3f4f6; /* gray-100 */
+            color: #1f2937; /* gray-800 */
+        }
+        /* Dark mode colors from screenshot */
+        body.dark {
+            background-color: #1A1A2E; /* Dark blue/purple for main background */
+            color: #E0E0E0; /* Light gray for text */
+        }
+        .header-bg-dark { background-color: #2C2C54; /* Slightly lighter dark for header */ }
+        .card-bg-dark { background-color: #3A3A60; /* Another slightly lighter dark for cards */ }
+        .text-accent-green { color: #34D399; /* Emerald-like green for accents */ }
+        .bg-accent-green { background-color: #059669; /* Darker emerald for buttons */ }
+        .hover\:bg-accent-green-dark:hover { background-color: #047857; /* Even darker emerald on hover */ }
+        .dot-amber { background-color: #FBBF24; /* Amber-400 for the small dot */ }
+        .hover\:bg-header-dark-hover:hover { background-color: #3A3A60; /* Hover for header elements */ }
+
+        .timeline-line { height: 2px; background-color: #059669; }
+        .timeline-point {
+            width: 1rem;
+            height: 1rem;
+            background-color: white;
+            border: 2px solid #059669;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .timeline-point.active {
+            background-color: #3b82f6; /* A distinct blue for active point */
+            border: 2px solid #3b82f6;
+            transform: scale(1.2);
+        }
+        /* Dark mode specific styles for timeline content */
+        .dark .text-gray-900 { color: #E0E0E0; }
+        .dark .text-gray-600 { color: #C0C0C0; }
+        .dark .text-stone-800 { color: #E0E0E0; } /* Year labels in dark mode */
+        .dark .bg-white { background-color: #3A3A60; } /* Content card background in dark mode */
+    </style>
+</head>
+<body class="dark bg-gray-100 text-gray-800">
+
+    <header class="header-bg-dark text-white shadow-md p-4 flex justify-between items-center fixed top-0 w-full z-10">
+        <div class="flex items-center space-x-2">
+            <div class="w-2 h-2 dot-amber rounded-full"></div>
+            <a href="index.html" class="text-xl font-bold">Timeline Explorer</a>
+        </div>
+        <nav class="flex items-center space-x-6">
+            <a href="index.html" class="hover:text-accent-green font-medium">Home</a>
+            <a href="space_exploration.html" class="hover:text-accent-green font-medium">Space Exploration</a>
+            <a href="history_of_robotics.html" class="hover:text-accent-green font-medium">Robotics</a>
+            <a href="artificial_intelligence.html" class="hover:text-accent-green font-medium">AI</a>
+            <a href="medical_advancements.html" class="hover:text-accent-green font-medium">Medical Advancements</a>
+            <a href="environmental_changes.html" class="hover:text-accent-green font-medium">Environmental Changes</a>
+            <a href="internet_evolution.html" class="hover:text-accent-green font-medium">Internet Evolution</a>
+            <button id="theme-toggle" class="p-2 rounded-full hover:bg-header-dark-hover transition-colors duration-300">
+                <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-8 pt-24 min-h-screen">
+        <h1 class="text-3xl md:text-4xl font-bold text-center my-8">History of Robotics</h1>
+        
+        <div class="relative flex items-center justify-between my-12 py-4">
+            <div class="absolute inset-0 timeline-line mx-auto z-0"></div>
+            <div id="timeline-container" class="flex justify-between w-full relative z-10">
+            </div>
+        </div>
+
+        <div id="content-card" class="bg-white card-bg-dark rounded-lg shadow-xl p-6 md:p-8 flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8 mt-12 hidden">
+        </div>
+    </main>
+
+    <footer class="bg-stone-800 text-white p-4 text-center text-sm mt-auto">
+        <p>
+            Contact: <a href="mailto:timelineexplorer@email.com" class="hover:underline">timelineexplorer@email.com</a> | Instagram: <a href="https://instagram.com/timeline_explorer" target="_blank" class="hover:underline">@timeline_explorer</a>
+        </p>
+        <p>
+            Address: Mumbai, India | Creator: Yuvan Oswal | <a href="#" target="_blank" class="hover:underline">LinkedIn</a>
+        </p>
+        <p class="mt-2 text-xs text-gray-400">&copy; 2025 Timeline Explorer. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const moonIcon = document.getElementById('moon-icon');
+        const sunIcon = document.getElementById('sun-icon');
+        const body = document.body;
+
+        const setDarkMode = (isDark) => {
+            if (isDark) {
+                body.classList.add('dark');
+                moonIcon.classList.add('hidden');
+                sunIcon.classList.remove('hidden');
+            } else {
+                body.classList.remove('dark');
+                moonIcon.classList.remove('hidden');
+                sunIcon.classList.add('hidden');
+            }
+        };
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(true);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = body.classList.toggle('dark');
+            setDarkMode(isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        const timelineData = [
+            {
+                year: 1954,
+                title: 'The First Industrial Robot: Unimate',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Unimate+Robot',
+                description: `
+The Unimate, a programmable manipulator, was invented by George Devol. This creation is widely considered to be the first industrial robot. Its primary function was to perform monotonous and dangerous tasks in a factory setting, such as moving die castings from a machine and welding them onto car bodies. This innovative device marked the beginning of modern factory automation.
+
+Devol filed the patent in 1954, and it was granted in 1961. The first Unimate was installed at a General Motors plant in New Jersey in 1961, where it was used to handle and weld parts, a job that was hazardous for human workers due to the high risk of inhaling toxic fumes. The robot’s initial installation was a significant milestone, proving the viability of robotics in industrial applications.
+
+It was essentially a single-arm, hydraulically powered machine that could perform a sequence of recorded movements. The robot’s movements were taught by a human operator who physically guided the arm through the required steps, which were then stored on a magnetic drum memory. This "teach and repeat" method became a fundamental principle in industrial robotics. The Unimate’s success paved the way for the widespread adoption of robotics in manufacturing, transforming assembly lines across the world.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=history+of+the+Unimate+robot'
+            },
+            {
+                year: 1961,
+                title: 'First Robot with a "Brain": Shakey',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Shakey+the+Robot',
+                description: `
+Shakey the Robot was a groundbreaking mobile automaton developed at the Stanford Research Institute (SRI) from 1966 to 1972. It was the first robot to combine locomotion, perception, and problem-solving, essentially making it the first true "thinking" robot. The project was funded by DARPA, and its goal was to create a mobile robot that could navigate and perform tasks in a real-world environment.
+
+Unlike previous robots that were programmed for a single task, Shakey could reason about its own actions and plan them. Its "brain" was a computer housed in a different room, and it communicated with the robot via a radio link. This computer ran a high-level reasoning system called STRIPS (Stanford Research Institute Problem Solver).
+
+Shakey used a television camera, a range finder, and tactile sensors to perceive its environment. It could recognize objects like boxes and ramps, and could plan a sequence of actions to move them. For example, if it needed to push a box off a platform, it would autonomously find a ramp, move the ramp to the platform, push the ramp up to the platform, and then climb the ramp to push the box. The development of Shakey laid the foundation for modern AI, computer vision, and robotics.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Shakey+the+Robot+history'
+            },
+            {
+                year: 1977,
+                title: 'The PUMA Robot Arm',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=PUMA+Robot+Arm',
+                description: `
+The PUMA (Programmable Universal Machine for Assembly) was a six-axis robotic arm designed by Victor Scheinman at Vicarm Inc. and later acquired by Unimation in 1977. PUMA was a revolutionary industrial robot, known for its precision, speed, and versatility. Unlike the massive Unimate, PUMA was designed for more delicate and complex tasks, such as assembling small parts and electronic components.
+
+It was one of the first robots to use a computer-based control system and advanced software, making it much easier to program and more adaptable than its predecessors. The PUMA was controlled by the VAL (Victor's Assembly Language) programming language, which allowed for a more intuitive way to define robot movements. This was a significant improvement over the physical "teach and repeat" methods of older robots.
+
+The PUMA became the standard for industrial robots for many years and was widely used in various industries, especially automotive manufacturing for tasks like painting and welding. Its modular design and computer control system set the benchmark for a new generation of robots that were smaller, faster, and more intelligent. The PUMA’s influence can still be seen in the design of modern industrial and collaborative robots.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=PUMA+robot+arm+history'
+            },
+            {
+                year: 1999,
+                title: 'Sony AIBO: The Robotic Pet',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Sony+AIBO',
+                description: `
+Sony's AIBO (Artificial Intelligence Robot) was a series of robotic pets designed to bring robotics and AI into the consumer market. AIBO wasn't just a toy; it was a sophisticated piece of technology that could learn and interact with its environment, as well as its owners. It featured a camera, microphones, and various sensors that allowed it to perceive its surroundings and react to stimuli.
+
+AIBO's behavior was a blend of pre-programmed actions and a learning algorithm. Over time, it could develop a unique "personality" based on how its owner interacted with it. For example, if you praised it, it would become more friendly and playful. If you ignored it, it might become more reserved. This learning capability was a significant breakthrough in consumer robotics.
+
+The AIBO was more than a novelty; it was a proof of concept for personal robotics. It showed that robots could be more than just industrial machines; they could be companions and interactive devices. While the original AIBO was discontinued, the concept of a robotic pet was revived by Sony with a new model in 2018, continuing the legacy of bringing robotics into our homes.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Sony+AIBO+robotic+pet'
+            },
+            {
+                year: 2002,
+                title: 'Roomba: Autonomous Home Robot',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Roomba',
+                description: `
+The iRobot Roomba, first released in 2002, was a game-changer for consumer robotics. While other companies were developing complex humanoid robots, iRobot focused on a simple, utilitarian device: an autonomous robotic vacuum cleaner. The Roomba's primary innovation was its ability to navigate a room without a pre-programmed map. It used a combination of infrared and bumper sensors to detect obstacles and navigate its path.
+
+The Roomba was programmed with a simple but effective set of behaviors. It would spiral outward from a starting point, follow walls, and crisscross the room randomly to ensure comprehensive coverage. Its success lay in its practical application and affordability, making it one of the first truly successful home robots. It demonstrated that robots could perform mundane household chores, freeing up human time.
+
+The Roomba's popularity inspired a new wave of home robotics, including robotic mops, lawnmowers, and pool cleaners. It moved the perception of robots from science fiction to everyday reality. The technology behind Roomba's navigation and sensing has since been refined and is now a core component of many modern autonomous devices.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Roomba+robotic+vacuum+history'
+            },
+            {
+                year: 2008,
+                title: 'Da Vinci Surgical System',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Da+Vinci+Surgical+System',
+                description: `
+The Da Vinci Surgical System is a prime example of robotics being used to enhance human capabilities, rather than replace them. Developed by Intuitive Surgical, the system is a sophisticated robotic platform that allows surgeons to perform complex, minimally invasive procedures with a high degree of precision and control. The surgeon sits at a console, where they view a high-definition, 3D image of the surgical site and manipulate robotic arms with specialized instruments.
+
+The system's arms are equipped with "EndoWrist" instruments that can bend and rotate with a far greater range of motion than the human wrist. This allows for intricate movements and a steady hand that can reduce tremors. The system is particularly useful for delicate operations in confined spaces, such as prostatectomies and cardiac procedures.
+
+The Da Vinci system has revolutionized surgical practice by reducing patient recovery time, minimizing blood loss, and decreasing the risk of infection. It has become a standard tool in many hospitals worldwide and demonstrates the incredible potential of combining human expertise with robotic precision to improve medical outcomes.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Da+Vinci+Surgical+System+history'
+            },
+            {
+                year: 2011,
+                title: 'Boston Dynamics Atlas',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Boston+Dynamics+Atlas',
+                description: `
+Atlas is a bipedal humanoid robot developed by Boston Dynamics. It is perhaps one of the most recognizable and awe-inspiring robots in the world due to its incredible agility, balance, and dynamic movement capabilities. Initially designed for search and rescue tasks, Atlas has since become a research platform to push the boundaries of what is possible with humanoid robotics.
+
+Through a series of viral videos, Atlas has demonstrated a wide range of abilities, including walking on uneven terrain, running, jumping, and even performing backflips and parkour-style movements. These feats are achieved through a combination of advanced sensors, powerful hydraulic systems, and sophisticated control algorithms that allow the robot to maintain its balance and react to its environment in real-time.
+
+Atlas is not just a showcase of hardware; it is a testament to the progress in AI and control theory. The robot’s ability to adapt and perform complex maneuvers is a significant step toward creating robots that can operate in unpredictable human environments. The long-term goal of the Atlas project is to create robots capable of assisting humans in a variety of complex and demanding situations.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Boston+Dynamics+Atlas+robot+info'
+            },
+            {
+                year: 2014,
+                title: 'Rise of Self-Driving Cars',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Self-Driving+Car',
+                description: `
+While the concept of self-driving cars has been around for decades, the mid-2010s saw a rapid acceleration in their development and public testing. Companies like Google (Waymo), Tesla, and others began to invest heavily in autonomous driving technology. This technology is a complex robotic system that combines several key components: advanced sensors (lidar, radar, cameras), sophisticated AI algorithms, and high-performance computing.
+
+The goal is to create a vehicle that can perceive its environment, make decisions, and navigate roads without human intervention. The AI systems in these cars are trained on massive datasets to recognize pedestrians, other vehicles, traffic signs, and road conditions. They can predict the behavior of other road users and plan safe and efficient routes.
+
+The rise of self-driving cars has the potential to revolutionize transportation, making it safer, more efficient, and more accessible. It also highlights the integration of robotics into our daily lives, where the line between a traditional vehicle and a complex, autonomous robot is becoming increasingly blurred. The technology is still evolving, but its impact is already being felt across the automotive and technology industries.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=history+of+self-driving+cars'
+            },
+            {
+                year: 2018,
+                title: 'Collaborative Robots (Cobots)',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Cobot',
+                description: `
+Collaborative robots, or "cobots," are designed to work alongside humans in a shared workspace without the need for safety cages. This is a significant departure from traditional industrial robots, which are large, fast, and require strict safety precautions. Cobots are smaller, more lightweight, and incorporate advanced sensors and safety features that allow them to detect human presence and stop or slow down to avoid collisions.
+
+The key innovation of cobots is their ease of use. They are often "taught" by a human operator who physically guides the robot arm through the required movements. The robot records these movements and can then repeat them. This simple programming method makes them accessible to small and medium-sized businesses that may not have the resources for a complex industrial robotics setup.
+
+Cobots are used for a variety of tasks, including assembly, material handling, and quality inspection. Their ability to assist human workers with repetitive or physically demanding tasks makes them a valuable tool for improving productivity and ergonomics. The rise of cobots represents a new era of human-robot collaboration, where robots are no longer just tools but partners in the workplace.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=collaborative+robots+cobots+info'
+            },
+            {
+                year: 2021,
+                title: 'Integration with Advanced AI',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=AI+Robot',
+                description: `
+In recent years, the field of robotics has been supercharged by breakthroughs in artificial intelligence, particularly in areas like machine learning and deep learning. Today's robots are no longer just pre-programmed to perform a set of tasks; they can learn from experience, adapt to new situations, and interact with the world in more natural ways.
+
+The integration of advanced AI has given robots new capabilities, such as natural language processing, complex problem-solving, and enhanced computer vision. This allows them to understand human commands, learn from demonstrations, and navigate highly complex and unpredictable environments. For example, a robot might be able to identify and pick up a new object it has never seen before, or it might be able to have a simple conversation with a person.
+
+This convergence of AI and robotics is leading to the development of a new generation of intelligent robots that can assist humans in a wide range of applications, from elderly care and household chores to scientific research and space exploration. The future of robotics is not just about automation, but about creating intelligent and collaborative partners that can work with us to solve some of the world's most complex challenges.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=advanced+AI+and+robotics+integration'
+            }
+        ];
+
+        const timelineContainer = document.getElementById('timeline-container');
+        const contentCard = document.getElementById('content-card');
+
+        function renderTimeline() {
+            timelineData.forEach(item => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex flex-col items-center cursor-pointer relative';
+                const yearLabel = document.createElement('span');
+                yearLabel.className = 'text-sm font-medium mb-2 absolute -top-8 text-gray-800 dark:text-gray-300'; /* Adjusted for dark mode */
+                yearLabel.textContent = item.year;
+                const point = document.createElement('div');
+                point.className = 'timeline-point rounded-full';
+                point.dataset.year = item.year;
+                wrapper.appendChild(yearLabel);
+                wrapper.appendChild(point);
+                timelineContainer.appendChild(wrapper);
+                point.addEventListener('click', () => {
+                    updateContent(item);
+                });
+            });
+        }
+
+        function updateContent(data) {
+            contentCard.innerHTML = `
+                <div class="flex-shrink-0 text-white font-bold text-6xl md:text-8xl text-accent-green mb-4 md:mb-0">${data.year}</div>
+                <div class="flex-grow">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-E0E0E0 mb-4">${data.title}</h2>
+                    <div class="w-full md:w-full h-auto mb-6">
+                        <img src="${data.image}" alt="${data.title}" class="rounded-lg shadow-md w-full">
+                    </div>
+                    <p class="text-gray-600 dark:text-C0C0C0 mb-6 whitespace-pre-wrap">${data.description.trim()}</p>
+                    <a href="${data.learnMoreUrl}" target="_blank" class="inline-block py-2 px-6 text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                        Learn More
+                    </a>
+                </div>
+            `;
+            contentCard.classList.remove('hidden');
+            document.querySelectorAll('.timeline-point').forEach(p => p.classList.remove('active'));
+            document.querySelector(`[data-year="${data.year}"]`).classList.add('active');
+        }
+
+        renderTimeline();
+        updateContent(timelineData[0]);
+    </script>
+</body>
+</html>
