@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Exploration Timeline | Timeline Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        /* Light mode default */
+        body {
+            background-color: #f3f4f6; /* gray-100 */
+            color: #1f2937; /* gray-800 */
+        }
+        /* Dark mode colors from screenshot */
+        body.dark {
+            background-color: #1A1A2E; /* Dark blue/purple for main background */
+            color: #E0E0E0; /* Light gray for text */
+        }
+        .header-bg-dark { background-color: #2C2C54; /* Slightly lighter dark for header */ }
+        .card-bg-dark { background-color: #3A3A60; /* Another slightly lighter dark for cards */ }
+        .text-accent-green { color: #34D399; /* Emerald-like green for accents */ }
+        .bg-accent-green { background-color: #059669; /* Darker emerald for buttons */ }
+        .hover\:bg-accent-green-dark:hover { background-color: #047857; /* Even darker emerald on hover */ }
+        .dot-amber { background-color: #FBBF24; /* Amber-400 for the small dot */ }
+        .hover\:bg-header-dark-hover:hover { background-color: #3A3A60; /* Hover for header elements */ }
+
+        .timeline-line { height: 2px; background-color: #059669; }
+        .timeline-point {
+            width: 1rem;
+            height: 1rem;
+            background-color: white;
+            border: 2px solid #059669;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .timeline-point.active {
+            background-color: #3b82f6; /* A distinct blue for active point */
+            border: 2px solid #3b82f6;
+            transform: scale(1.2);
+        }
+        /* Dark mode specific styles for timeline content */
+        .dark .text-gray-900 { color: #E0E0E0; }
+        .dark .text-gray-600 { color: #C0C0C0; }
+        .dark .text-stone-800 { color: #E0E0E0; } /* Year labels in dark mode */
+        .dark .bg-white { background-color: #3A3A60; } /* Content card background in dark mode */
+    </style>
+</head>
+<body class="dark bg-gray-100 text-gray-800">
+
+    <header class="header-bg-dark text-white shadow-md p-4 flex justify-between items-center fixed top-0 w-full z-10">
+        <div class="flex items-center space-x-2">
+            <div class="w-2 h-2 dot-amber rounded-full"></div>
+            <a href="index.html" class="text-xl font-bold">Timeline Explorer</a>
+        </div>
+        <nav class="flex items-center space-x-6">
+            <a href="index.html" class="hover:text-accent-green font-medium">Home</a>
+            <a href="space_exploration.html" class="hover:text-accent-green font-medium">Space Exploration</a>
+            <a href="history_of_robotics.html" class="hover:text-accent-green font-medium">Robotics</a>
+            <a href="artificial_intelligence.html" class="hover:text-accent-green font-medium">AI</a>
+            <a href="medical_advancements.html" class="hover:text-accent-green font-medium">Medical Advancements</a>
+            <a href="environmental_changes.html" class="hover:text-accent-green font-medium">Environmental Changes</a>
+            <a href="internet_evolution.html" class="hover:text-accent-green font-medium">Internet Evolution</a>
+            <button id="theme-toggle" class="p-2 rounded-full hover:bg-header-dark-hover transition-colors duration-300">
+                <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-8 pt-24 min-h-screen">
+        <h1 class="text-3xl md:text-4xl font-bold text-center my-8">Space Exploration</h1>
+        
+        <div class="relative flex items-center justify-between my-12 py-4">
+            <div class="absolute inset-0 timeline-line mx-auto z-0"></div>
+            <div id="timeline-container" class="flex justify-between w-full relative z-10">
+            </div>
+        </div>
+
+        <div id="content-card" class="bg-white card-bg-dark rounded-lg shadow-xl p-6 md:p-8 flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8 mt-12 hidden">
+        </div>
+    </main>
+
+    <footer class="bg-stone-800 text-white p-4 text-center text-sm mt-auto">
+        <p>
+            Contact: <a href="mailto:timelineexplorer@email.com" class="hover:underline">timelineexplorer@email.com</a> | Instagram: <a href="https://instagram.com/timeline_explorer" target="_blank" class="hover:underline">@timeline_explorer</a>
+        </p>
+        <p>
+            Address: Mumbai, India | Creator: Yuvan Oswal | <a href="#" target="_blank" class="hover:underline">LinkedIn</a>
+        </p>
+        <p class="mt-2 text-xs text-gray-400">&copy; 2025 Timeline Explorer. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const moonIcon = document.getElementById('moon-icon');
+        const sunIcon = document.getElementById('sun-icon');
+        const body = document.body;
+
+        const setDarkMode = (isDark) => {
+            if (isDark) {
+                body.classList.add('dark');
+                moonIcon.classList.add('hidden');
+                sunIcon.classList.remove('hidden');
+            } else {
+                body.classList.remove('dark');
+                moonIcon.classList.remove('hidden');
+                sunIcon.classList.add('hidden');
+            }
+        };
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(true);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = body.classList.toggle('dark');
+            setDarkMode(isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        const timelineData = [
+            {
+                year: 1957,
+                title: 'Sputnik 1: The First Artificial Satellite',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Sputnik+1',
+                description: `
+On October 4, 1957, the Soviet Union launched Sputnik 1, the first artificial Earth satellite. A simple metal sphere with four external antennas, it was a major scientific and political achievement. Its successful launch marked the beginning of the Space Age and triggered the Space Race between the United States and the Soviet Union. The satellite orbited Earth for three months, transmitting radio signals that could be picked up by ham radio operators worldwide, a symbolic moment of humanity's entry into space. The launch of Sputnik had a profound impact on global politics, science, and education, accelerating space programs and inspiring a new generation of scientists and engineers.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Sputnik+1+launch+details'
+            },
+            {
+                year: 1961,
+                title: 'Yuri Gagarin: First Human in Space',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Yuri+Gagarin',
+                description: `
+Soviet cosmonaut Yuri Gagarin became the first human to journey into outer space on April 12, 1961. Aboard the Vostok 1 spacecraft, he completed one full orbit of the Earth, a flight that lasted 108 minutes. His mission was a triumph for the Soviet space program and a defining moment in the history of space exploration. Gagarin's flight demonstrated that humans could survive and function in the extreme conditions of space, paving the way for future crewed missions. His famous quote, "Poyekhali!" (Let's go!), became a rallying cry for space enthusiasts worldwide, symbolizing humanity's bold leap into the unknown.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Yuri+Gagarin+Vostok+1'
+            },
+            {
+                year: 1969,
+                title: 'Apollo 11: The Moon Landing',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Apollo+11',
+                description: `
+On July 20, 1969, NASA’s Apollo 11 mission successfully landed two astronauts, Neil Armstrong and Buzz Aldrin, on the Moon. As Armstrong took his first steps onto the lunar surface, he famously declared, "That's one small step for a man, one giant leap for mankind." The mission fulfilled President John F. Kennedy's goal of landing a man on the Moon and returning him safely to Earth, a monumental achievement that captivated the world and marked the pinnacle of the Space Race. The event was watched by millions globally, inspiring a generation and showcasing the incredible power of human ingenuity and determination.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Apollo+11+mission'
+            },
+            {
+                year: 1990,
+                title: 'Hubble Space Telescope Launch',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Hubble+Space+Telescope',
+                description: `
+The Hubble Space Telescope (HST) was launched into low Earth orbit on April 24, 1990. Despite an initial flaw in its primary mirror, which was corrected by a servicing mission in 1993, Hubble has become one of the most important tools in the history of astronomy. Its breathtaking images of galaxies, nebulae, and planets have transformed our understanding of the universe and brought the wonders of space to the general public. For over three decades, Hubble has provided invaluable data, helping scientists determine the age of the universe, discover new galaxies, and study exoplanet atmospheres, leaving an unparalleled legacy of astronomical discovery.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Hubble+Space+Telescope+launch'
+            },
+            {
+                year: 1997,
+                title: 'Mars Pathfinder and Sojourner Rover',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Sojourner+Rover+Mars',
+                description: `
+NASA's Mars Pathfinder mission landed on Mars on July 4, 1997, deploying the first-ever mobile rover on the Red Planet, the Sojourner. This mission was a key technological demonstration, proving that a low-cost spacecraft could land successfully and operate a rover on Mars. The data and images collected by the Sojourner rover provided a new perspective on the Martian surface and laid the groundwork for the more advanced rovers that would follow. Its successful deployment and operation, despite being a relatively small and inexpensive mission, demonstrated the potential for robotic exploration to revolutionize our understanding of other planets.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Mars+Pathfinder+Sojourner+rover'
+            },
+            {
+                year: 2000,
+                title: 'First Crew on the ISS',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=International+Space+Station',
+                description: `
+The International Space Station (ISS) is a modular space station in low Earth orbit, and on November 2, 2000, the first resident crew arrived. This marked the beginning of a continuous human presence in space. The ISS is a collaborative project between multiple space agencies, symbolizing international cooperation in space exploration. It serves as a microgravity research laboratory where crews conduct experiments in biology, physics, astronomy, and more. The station has provided invaluable insights into long-duration spaceflight, preparing humanity for future missions to the Moon and Mars, and fostering a spirit of global scientific partnership.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=First+crew+International+Space+Station'
+            },
+            {
+                year: 2004,
+                title: 'SpaceShipOne: First Private Spaceflight',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=SpaceShipOne',
+                description: `
+SpaceShipOne made history on June 21, 2004, as the first privately funded crewed spacecraft to achieve suborbital flight. It was developed by Scaled Composites and designed to win the Ansari X Prize. The success of SpaceShipOne proved the viability of private enterprise in space exploration, opening the door for the commercial space industry. This event was a major step toward making space travel accessible to private citizens, demonstrating that innovation outside of government agencies could push the boundaries of spaceflight and usher in a new era of space tourism and commercial endeavors.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=SpaceShipOne+private+spaceflight'
+            },
+            {
+                year: 2012,
+                title: 'Curiosity Rover on Mars',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Curiosity+Rover',
+                description: `
+NASA's Curiosity rover successfully landed on Mars on August 6, 2012. It is a car-sized robot designed to explore the Gale Crater and determine if Mars ever had the environmental conditions to support microbial life. Curiosity has been a workhorse of planetary science, providing groundbreaking data on the geology and atmosphere of Mars, and discovering evidence of ancient water and organic molecules. Its sophisticated suite of instruments and extended mission have significantly advanced our understanding of Mars' past habitability and its potential for future human exploration.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Curiosity+rover+on+Mars'
+            },
+            {
+                year: 2020,
+                title: 'Crewed Dragon Demo-2 Mission',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=SpaceX+Crew+Dragon',
+                description: `
+On May 30, 2020, SpaceX's Crew Dragon spacecraft, with NASA astronauts Bob Behnken and Doug Hurley on board, successfully launched and docked with the International Space Station. This mission, known as Demo-2, was a historic event as it marked the first time a private company had launched astronauts into orbit. It signaled a new era of space travel where private companies, not just government agencies, play a leading role in crewed spaceflight. This successful demonstration paved the way for regular commercial crew rotation missions to the ISS, significantly expanding access to space for astronauts from various nations.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=SpaceX+Crew+Dragon+Demo-2'
+            },
+            {
+                year: 2021,
+                title: 'James Webb Space Telescope',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=James+Webb+Space+Telescope',
+                description: `
+The James Webb Space Telescope (JWST), the successor to the Hubble Space Telescope, was launched on December 25, 2021. It is the most powerful space telescope ever built, with a primary mirror made of 18 hexagonal segments. Its mission is to study the first galaxies that formed in the universe, the birth of stars, and the atmospheres of exoplanets. The images and data from JWST are expected to revolutionize our understanding of the cosmos, providing unprecedented views into the early universe and the potential for life beyond Earth. Its infrared capabilities allow it to peer through dust and gas, revealing hidden cosmic phenomena.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=James+Webb+Space+Telescope+launch'
+            }
+        ];
+
+        const timelineContainer = document.getElementById('timeline-container');
+        const contentCard = document.getElementById('content-card');
+
+        function renderTimeline() {
+            timelineData.forEach(item => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex flex-col items-center cursor-pointer relative';
+                const yearLabel = document.createElement('span');
+                yearLabel.className = 'text-sm font-medium mb-2 absolute -top-8 text-gray-800 dark:text-gray-300'; /* Adjusted for dark mode */
+                yearLabel.textContent = item.year;
+                const point = document.createElement('div');
+                point.className = 'timeline-point rounded-full';
+                point.dataset.year = item.year;
+                wrapper.appendChild(yearLabel);
+                wrapper.appendChild(point);
+                timelineContainer.appendChild(wrapper);
+                point.addEventListener('click', () => {
+                    updateContent(item);
+                });
+            });
+        }
+
+        function updateContent(data) {
+            contentCard.innerHTML = `
+                <div class="flex-shrink-0 text-white font-bold text-6xl md:text-8xl text-accent-green mb-4 md:mb-0">${data.year}</div>
+                <div class="flex-grow">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-E0E0E0 mb-4">${data.title}</h2>
+                    <div class="w-full md:w-full h-auto mb-6">
+                        <img src="${data.image}" alt="${data.title}" class="rounded-lg shadow-md w-full">
+                    </div>
+                    <p class="text-gray-600 dark:text-C0C0C0 mb-6 whitespace-pre-wrap">${data.description.trim()}</p>
+                    <a href="${data.learnMoreUrl}" target="_blank" class="inline-block py-2 px-6 text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                        Learn More
+                    </a>
+                </div>
+            `;
+            contentCard.classList.remove('hidden');
+            document.querySelectorAll('.timeline-point').forEach(p => p.classList.remove('active'));
+            document.querySelector(`[data-year="${data.year}"]`).classList.add('active');
+        }
+
+        renderTimeline();
+        updateContent(timelineData[0]);
+    </script>
+</body>
+</html>
