@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environmental Changes Timeline | Timeline Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        /* Light mode default */
+        body {
+            background-color: #f3f4f6; /* gray-100 */
+            color: #1f2937; /* gray-800 */
+        }
+        /* Dark mode colors from screenshot */
+        body.dark {
+            background-color: #1A1A2E; /* Dark blue/purple for main background */
+            color: #E0E0E0; /* Light gray for text */
+        }
+        .header-bg-dark { background-color: #2C2C54; /* Slightly lighter dark for header */ }
+        .card-bg-dark { background-color: #3A3A60; /* Another slightly lighter dark for cards */ }
+        .text-accent-green { color: #34D399; /* Emerald-like green for accents */ }
+        .bg-accent-green { background-color: #059669; /* Darker emerald for buttons */ }
+        .hover\:bg-accent-green-dark:hover { background-color: #047857; /* Even darker emerald on hover */ }
+        .dot-amber { background-color: #FBBF24; /* Amber-400 for the small dot */ }
+        .hover\:bg-header-dark-hover:hover { background-color: #3A3A60; /* Hover for header elements */ }
+
+        .timeline-line { height: 2px; background-color: #059669; }
+        .timeline-point {
+            width: 1rem;
+            height: 1rem;
+            background-color: white;
+            border: 2px solid #059669;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .timeline-point.active {
+            background-color: #3b82f6; /* A distinct blue for active point */
+            border: 2px solid #3b82f6;
+            transform: scale(1.2);
+        }
+        /* Dark mode specific styles for timeline content */
+        .dark .text-gray-900 { color: #E0E0E0; }
+        .dark .text-gray-600 { color: #C0C0C0; }
+        .dark .text-stone-800 { color: #E0E0E0; } /* Year labels in dark mode */
+        .dark .bg-white { background-color: #3A3A60; } /* Content card background in dark mode */
+    </style>
+</head>
+<body class="dark bg-gray-100 text-gray-800">
+
+    <header class="header-bg-dark text-white shadow-md p-4 flex justify-between items-center fixed top-0 w-full z-10">
+        <div class="flex items-center space-x-2">
+            <div class="w-2 h-2 dot-amber rounded-full"></div>
+            <a href="index.html" class="text-xl font-bold">Timeline Explorer</a>
+        </div>
+        <nav class="flex items-center space-x-6">
+            <a href="index.html" class="hover:text-accent-green font-medium">Home</a>
+            <a href="space_exploration.html" class="hover:text-accent-green font-medium">Space Exploration</a>
+            <a href="history_of_robotics.html" class="hover:text-accent-green font-medium">Robotics</a>
+            <a href="artificial_intelligence.html" class="hover:text-accent-green font-medium">AI</a>
+            <a href="medical_advancements.html" class="hover:text-accent-green font-medium">Medical Advancements</a>
+            <a href="environmental_changes.html" class="hover:text-accent-green font-medium">Environmental Changes</a>
+            <a href="internet_evolution.html" class="hover:text-accent-green font-medium">Internet Evolution</a>
+            <button id="theme-toggle" class="p-2 rounded-full hover:bg-header-dark-hover transition-colors duration-300">
+                <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-8 pt-24 min-h-screen">
+        <h1 class="text-3xl md:text-4xl font-bold text-center my-8">Environmental Changes</h1>
+        
+        <div class="relative flex items-center justify-between my-12 py-4">
+            <div class="absolute inset-0 timeline-line mx-auto z-0"></div>
+            <div id="timeline-container" class="flex justify-between w-full relative z-10">
+            </div>
+        </div>
+
+        <div id="content-card" class="bg-white card-bg-dark rounded-lg shadow-xl p-6 md:p-8 flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8 mt-12 hidden">
+        </div>
+    </main>
+
+    <footer class="bg-stone-800 text-white p-4 text-center text-sm mt-auto">
+        <p>
+            Contact: <a href="mailto:timelineexplorer@email.com" class="hover:underline">timelineexplorer@email.com</a> | Instagram: <a href="https://instagram.com/timeline_explorer" target="_blank" class="hover:underline">@timeline_explorer</a>
+        </p>
+        <p>
+            Address: Mumbai, India | Creator: Yuvan Oswal | <a href="#" target="_blank" class="hover:underline">LinkedIn</a>
+        </p>
+        <p class="mt-2 text-xs text-gray-400">&copy; 2025 Timeline Explorer. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const moonIcon = document.getElementById('moon-icon');
+        const sunIcon = document.getElementById('sun-icon');
+        const body = document.body;
+
+        const setDarkMode = (isDark) => {
+            if (isDark) {
+                body.classList.add('dark');
+                moonIcon.classList.add('hidden');
+                sunIcon.classList.remove('hidden');
+            } else {
+                body.classList.remove('dark');
+                moonIcon.classList.remove('hidden');
+                sunIcon.classList.add('hidden');
+            }
+        };
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(true);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = body.classList.toggle('dark');
+            setDarkMode(isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        const timelineData = [
+            {
+                year: 1962,
+                title: 'Silent Spring is Published',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Silent+Spring+Book',
+                description: `
+Rachel Carson's book "Silent Spring" was published in 1962, documenting the devastating effects of pesticides, particularly DDT, on the environment and wildlife. The book's title referred to the disappearance of bird songs due to the widespread use of these chemicals. "Silent Spring" is credited with launching the modern environmental movement and leading to the nationwide ban on DDT in 1972. It brought public attention to the interconnectedness of ecosystems and the long-term consequences of human actions on the natural world, sparking a wave of environmental activism and policy changes.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Rachel+Carson+Silent+Spring'
+            },
+            {
+                year: 1969,
+                title: 'Cuyahoga River Catches Fire',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Cuyahoga+River+Fire',
+                description: `
+The Cuyahoga River in Cleveland, Ohio, was so polluted with industrial waste that it caught fire on June 22, 1969. While not the first time the river had burned, this event received widespread national media attention, becoming a powerful symbol of environmental neglect and industrial pollution. The fire galvanized public support for environmental protection and played a significant role in the passage of the Clean Water Act and the creation of the Environmental Protection Agency (EPA). This incident served as a stark reminder of the urgent need for environmental regulation and corporate responsibility.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Cuyahoga+River+fire+1969'
+            },
+            {
+                year: 1970,
+                title: 'The First Earth Day',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=First+Earth+Day',
+                description: `
+On April 22, 1970, the first Earth Day was celebrated in the United States. Inspired by the anti-war movement, millions of Americans took to the streets to protest environmental degradation. The event was a massive success, leading to the creation of the Environmental Protection Agency (EPA) and the passage of landmark environmental laws, including the Clean Air Act, the Clean Water Act, and the Endangered Species Act. Earth Day is now celebrated globally as a reminder of the importance of protecting our planet, fostering a collective commitment to environmental stewardship and sustainable practices.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=first+Earth+Day+history'
+            },
+            {
+                year: 1978,
+                title: 'Love Canal Toxic Waste Disaster',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Love+Canal+Disaster',
+                description: `
+In Love Canal, a neighborhood in Niagara Falls, New York, residents discovered that their homes and schools were built on a former toxic waste dump. The buried chemical waste began to leak into basements and yards, causing serious health problems for the community. The resulting public outcry led to the creation of the Superfund Act in 1980, a federal program designed to clean up hazardous waste sites. Love Canal became a symbol of the dangers of improper waste disposal and a landmark case in environmental justice, highlighting the disproportionate impact of pollution on vulnerable communities and the need for stronger regulations.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Love+Canal+toxic+waste+disaster'
+            },
+            {
+                year: 1984,
+                title: 'Bhopal Disaster',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Bhopal+Disaster',
+                description: `
+The Bhopal disaster, which occurred on the night of December 2–3, 1984, was a chemical leak at the Union Carbide pesticide plant in Bhopal, India. Over 500,000 people were exposed to toxic methyl isocyanate gas, and thousands died. The disaster is considered one of the world's worst industrial catastrophes. It highlighted the devastating consequences of corporate negligence and the lack of safety regulations in developing countries. The event led to increased awareness of industrial hazards and the need for international safety standards, prompting new laws and regulations to prevent similar tragedies.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Bhopal+disaster+history'
+            },
+            {
+                year: 1987,
+                title: 'Montreal Protocol',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Montreal+Protocol',
+                description: `
+The Montreal Protocol on Substances that Deplete the Ozone Layer is an international treaty designed to protect the ozone layer by phasing out the production of numerous substances responsible for ozone depletion. Adopted in 1987, it is one of the most successful international environmental agreements in history. The protocol has been instrumental in the recovery of the ozone layer, preventing millions of cases of skin cancer and cataracts. Its success demonstrated that global cooperation on environmental issues is possible and set a precedent for future climate action.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Montreal+Protocol+ozone+layer'
+            },
+            {
+                year: 1992,
+                title: 'Rio Earth Summit',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Rio+Earth+Summit',
+                description: `
+The United Nations Conference on Environment and Development, also known as the Rio Earth Summit, was a major international conference held in Rio de Janeiro, Brazil. It brought together 172 governments and thousands of NGOs to address global environmental issues. The summit produced several key documents, including the Rio Declaration on Environment and Development, the Framework Convention on Climate Change (UNFCCC), and the Convention on Biological Diversity. The event was a turning point in global environmental politics, popularizing the concept of sustainable development and formalizing international efforts to address climate change.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Rio+Earth+Summit+1992'
+            },
+            {
+                year: 2006,
+                title: 'An Inconvenient Truth',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=An+Inconvenient+Truth',
+                description: `
+Former U.S. Vice President Al Gore's documentary "An Inconvenient Truth" was released in 2006. The film presented a compelling case for the severity of climate change and its human causes, making the complex scientific issue accessible to a mainstream audience. The documentary was a commercial success and won two Academy Awards, significantly raising public awareness and concern about global warming. It is widely credited with shifting the public discourse on climate change and mobilizing political action, inspiring a new generation of climate activists and advocates.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=An+Inconvenient+Truth+documentary'
+            },
+            {
+                year: 2015,
+                title: 'Paris Agreement',
+                image: 'https://placehold.co/600x400/808080/FFFFFF/png?text=Paris+Agreement+UN',
+                description: `
+The Paris Agreement is a legally binding international treaty on climate change adopted by 196 parties at the COP 21 in Paris. Its central aim is to strengthen the global response to the threat of climate change by keeping a global temperature rise this century well below 2 degrees Celsius above pre-industrial levels and to pursue efforts to limit the temperature increase even further to 1.5 degrees Celsius. The agreement represents a historic commitment to combat climate change and adapt to its effects, with all countries submitting their own climate action plans (Nationally Determined Contributions or NDCs) to achieve this global goal.
+                `,
+                learnMoreUrl: 'https://www.google.com/search?q=Paris+Agreement+climate+change'
+            }
+        ];
+
+        const timelineContainer = document.getElementById('timeline-container');
+        const contentCard = document.getElementById('content-card');
+
+        function renderTimeline() {
+            timelineData.forEach(item => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex flex-col items-center cursor-pointer relative';
+                const yearLabel = document.createElement('span');
+                yearLabel.className = 'text-sm font-medium mb-2 absolute -top-8 text-gray-800 dark:text-gray-300'; /* Adjusted for dark mode */
+                yearLabel.textContent = item.year;
+                const point = document.createElement('div');
+                point.className = 'timeline-point rounded-full';
+                point.dataset.year = item.year;
+                wrapper.appendChild(yearLabel);
+                wrapper.appendChild(point);
+                timelineContainer.appendChild(wrapper);
+                point.addEventListener('click', () => {
+                    updateContent(item);
+                });
+            });
+        }
+
+        function updateContent(data) {
+            contentCard.innerHTML = `
+                <div class="flex-shrink-0 text-white font-bold text-6xl md:text-8xl text-accent-green mb-4 md:mb-0">${data.year}</div>
+                <div class="flex-grow">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-E0E0E0 mb-4">${data.title}</h2>
+                    <div class="w-full md:w-full h-auto mb-6">
+                        <img src="${data.image}" alt="${data.title}" class="rounded-lg shadow-md w-full">
+                    </div>
+                    <p class="text-gray-600 dark:text-C0C0C0 mb-6 whitespace-pre-wrap">${data.description.trim()}</p>
+                    <a href="${data.learnMoreUrl}" target="_blank" class="inline-block py-2 px-6 text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                        Learn More
+                    </a>
+                </div>
+            `;
+            contentCard.classList.remove('hidden');
+            document.querySelectorAll('.timeline-point').forEach(p => p.classList.remove('active'));
+            document.querySelector(`[data-year="${data.year}"]`).classList.add('active');
+        }
+
+        renderTimeline();
+        updateContent(timelineData[0]);
+    </script>
+</body>
+</html>
