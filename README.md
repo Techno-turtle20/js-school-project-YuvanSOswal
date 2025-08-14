@@ -13,10 +13,10 @@ A fully interactive, responsive, and theme-switchable timeline application that 
 - External Links – Each event includes a "Learn More" link to Wikipedia.
 
 ## Project Structure
-├── index.html # Main HTML structure
-├── styles.css # Styling for light and dark themes
-├── script.js # JavaScript for data loading and interactivity
-└── timeline.json # Event data for all topics and subtopics
+-index.html # Main HTML structure
+-styles.css # Styling for light and dark themes
+-script.js # JavaScript for data loading and interactivity
+=timeline.json # Event data for all topics and subtopics
 
 ## Steps
 1. Clone or download this repository.
