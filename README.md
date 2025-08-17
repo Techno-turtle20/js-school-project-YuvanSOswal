@@ -68,6 +68,7 @@ The project uses TypeScript, which needs to be compiled into JavaScript before r
 # Project Structure
 
 The project maintains a clear and modular file structure, making it easy to navigate and understand:
+```
 .
 ├── dist/                   
 │   ├── services/
@@ -106,6 +107,6 @@ The project maintains a clear and modular file structure, making it easy to navi
 ├── styles.css              
 ├── timeline.json          
 └── tsconfig.json          
-
+```
 # Author
 Yuvan SOswal - DataArt JS School Project
