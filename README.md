@@ -109,4 +109,4 @@ The project maintains a clear and modular file structure, making it easy to navi
 └── tsconfig.json          
 ```
 # Author
-Yuvan SOswal - DataArt JS School Project
+Yuvan S Oswal - DataArt JS School Project
